@@ -16,3 +16,25 @@ img {
   display: block;
   max-width: 100%;
 }
+/* Поле ввода ------------------- */
+
+
+/* Кнопка старт ----------------- */
+
+/* Таймер ----------------------- */
+.timer {
+  display: flex;
+  text-align: center; 
+}
+
+.field {
+  width: 100px;
+  padding: 0.5em 0.5em;
+  color: tomato;
+  font-weight: 700;
+  font-size: 1.5em;
+}
+
+.label {
+  color: black;
+}
