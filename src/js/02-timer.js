@@ -6,10 +6,10 @@ import "flatpickr/dist/flatpickr.min.css";
 
 import Notiflix from 'notiflix';
 import "notiflix/dist/notiflix-3.2.2.min.css";
+// ------------------------------------------
 
 // --- Блок инициализации -------------------
 // ------------------------------------------
-
 const daysCounter = document.querySelector('[data-day]');
 const hoursCounter = document.querySelector('[data-hours]');
 const minutesCounter = document.querySelector('[data-minutes]');
@@ -21,13 +21,19 @@ const startBtn = document.querySelector('[data-start]');
 
 // Кнопка Старт неактивна
 startBtn.setAttribute('disabled', true);
+// ------------------------------------------
 
 // --- Блок обработки -----------------------
 // ------------------------------------------
+const onInputField = () => {
+  startBtn.removeAttribute('disabled');
+};
 
+const onStartClick = () => {};
 // ------------------------------------------
 
 // --- Слушатели ----------------------------
 // ------------------------------------------
-fieldInput.addEventListener('onfocus')
+fieldInput.addEventListener('focus',onInputField);
+startBtn.addEventListener('click', onStartClick);
 // ------------------------------------------
