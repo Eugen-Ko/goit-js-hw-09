@@ -22,6 +22,7 @@ stopBtn.setAttribute('disabled', true);
 
 // Функция смены цвета
 const changeColor = () => bodyArea.style.backgroundColor = getRandomHexColor();
+// ------------------------------------------
 
 // Функция обработки кнопки Старт
 const onStartClick = () => {
@@ -37,8 +38,9 @@ const onStartClick = () => {
   // Запуск повторения смены цвета
   timerId = setInterval(changeColor, 1000);
 };
+// -------------------------------------------
 
-// Функция обработки кнопки Стоп
+// Функция обработки кнопки Стоп 
 const onStopClick = () => {
   
   // Старт активный, Стоп неактивный
