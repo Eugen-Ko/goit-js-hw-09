@@ -10,15 +10,15 @@ function getRandomHexColor() {
 const bodyArea = document.querySelector('body');
 const startBtn = document.querySelector('[data-start]');
 const stopBtn = document.querySelector('[data-stop]');
-// ------------------------------------------
-
-// --- Блок обработки -----------------------
-// ------------------------------------------
 
 // Переменная таймера в глобальной зоне видимости
 let timerId = null;
 // Кнопка Стоп неактивна
 stopBtn.setAttribute('disabled', true);
+// ------------------------------------------
+
+// --- Блок обработки -----------------------
+// ------------------------------------------
 
 // Функция смены цвета
 const changeColor = () => bodyArea.style.backgroundColor = getRandomHexColor();
