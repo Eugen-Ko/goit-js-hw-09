@@ -21,18 +21,24 @@ const refs = {
   fieldInput: document.querySelector('#datetime-picker'),
 
   startBtn: document.querySelector('[data-start]'),
+
+  timer: document.querySelector('.timer'),
 };
 
 // Объект временных интервалов --------------
 const timeRange = {
   second: 1000,
   minute: 60000,
-  hour: 36000000,
+  hour: 3600000,
   day: 86400000,
 };
 
 // Глобальная переменная временной разницы --
 let timeDiff = null;
+// Глобальная переменная экземпляра flatpickr
+let inputF = null;
+// Глобальная переменная счетчика
+let timerId = null;
 
 // Инициализация опций flatpickr и вызов ---
 // обработчика времени ---------------------
@@ -49,10 +55,33 @@ const options = {
 };
 
 // Кнопка Старт деактивирована --------------
-startBtn.setAttribute('disabled', true);
+refs.startBtn.setAttribute('disabled', true);
 
-// Навесили на поле ввода вызов flatpickr ---
-flatpickr('#datetime-picker', options);
+// Создание и удаление экземпляра flatpickr ---
+const creatFlatPickr = action => {
+  if (action === 'create') {
+    inputF = new flatpickr('#datetime-picker', options);
+    return;
+  }
+  if (action === 'destroy') {
+    inputF.destroy();
+    return;
+  }
+};
+
+creatFlatPickr('create');
+
+// Создание и скрытие кнопки Стоп
+const createStopBtn = () => {
+  refs.timer.insertAdjacentHTML(
+    'beforebegin',
+    `<button type="button" data-stop>Stop and Clear</button>`,
+  );
+};
+
+createStopBtn();
+const stopBtn = document.querySelector('[data-stop]');
+stopBtn.style.visibility = 'hidden';
 
 // ------------------------------------------
 // --- Конец блока инициализации ------------
@@ -62,138 +91,111 @@ flatpickr('#datetime-picker', options);
 // --- Блок обработки -----------------------
 // ------------------------------------------
 
-// Обработчик даты --------------------------
+// --- Обработчик даты ----------------------
 const dateHandler = () => {
-  const dateMS = Date.parse(fieldInput.value);
+  // Получаем введенную дату в милисекундах
+  const dateMS = Date.parse(refs.fieldInput.value);
+  // Получаем текущую дату в милисекундах
   const currentDate = new Date();
+  // Проверяем или вбраная дата больше текущей
   if (dateMS - currentDate.getTime() < 0) {
-    alert('asfsfs');
+    // Деактивируем кнопку Старт если передумали
+    // и изменили дату на неправильную до нажатия Старт
+    refs.startBtn.setAttribute('disabled', true);
+    // Сообщение о неправильной дате
+    Notiflix.Report.failure(
+      'Ахтунг !!!',
+      'Вы ввели дату из прошлого. Нажмите на кнопку и ждите машину времени !!!',
+      'Вызов машины времени',
+    );
+    // alert('Введенная дата и время уже прошли. Выберете дату из будущего');
+    // конец функции
     return;
   }
-  startBtn.removeAttribute('disabled');
-  writeTimerValue(dateMS - currentDate.getTime());
-  global = dateMS - currentDate.getTime();
+
+  // Активируем кнопку старт
+  refs.startBtn.removeAttribute('disabled');
+  Notiflix.Notify.success('Все ОК!! Можем начинать осчет !!!');
+  timeDiff = dateMS - currentDate.getTime();
+  writeTimerValue(timeDiff);
 };
 
 // --- Дописываем нуль к числу менше 10 -----
 const addZeroToNumber = number => String(number).padStart(2, '0');
 
 // --- Конвертация миллисекунд в дату -------
-const converMSecToDate = timeMSec => {
-  const days = addZeroToNumber(Math.floor(timeMSec / day));
-  const hours = addZeroToNumber(Math.floor((timeMSec % day) / hour));
-  const minutes = addZeroToNumber(Math.floor(((timeMSec % day) % hour) / minute));
-  const seconds = addZeroToNumber(Math.floor((((timeMSec % day) % hour) % minute) / second));
+const convertMSecToDate = current => {
+  // Деструктуризация
+  const { second, minute, hour, day } = timeRange;
+
+  // Высчитываем значения дня, часа, минуты, секунды
+  const days = addZeroToNumber(Math.floor(current / day));
+  const hours = addZeroToNumber(Math.floor((current % day) / hour));
+  const minutes = addZeroToNumber(Math.floor(((current % day) % hour) / minute));
+  const seconds = addZeroToNumber(Math.floor((((current % day) % hour) % minute) / second));
+
+  // Возвращаем объект полученных значений
   return { days, hours, minutes, seconds };
 };
 
-// --- Запись начального значения таймера ----
-const writeTimerValue = timeMSec => {
-  const { days, hours, minutes, seconds } = converMSecToDate(timeMSec);
-  daysCounter.textContent = days;
-  hoursCounter.textContent = hours;
-  minutesCounter.textContent = minutes;
-  secondsCounter.textContent = seconds;
+// --- Запись значения таймера --------------
+const writeTimerValue = current => {
+  // Деструктуризация
+  const { days, hours, minutes, seconds } = convertMSecToDate(current);
+
+  // Прописываем значения в поля счетчика
+  refs.daysCounter.textContent = days;
+  refs.hoursCounter.textContent = hours;
+  refs.minutesCounter.textContent = minutes;
+  refs.secondsCounter.textContent = seconds;
 };
 
 // --- Счетчик -------------------------------
-const reverseCounter = timeMSec => {
-  startBtn.setAttribute('disabled', true);
-  let current = timeMSec;
-  let timerId = setInterval(() => {
-    console.log(current);
-    writeTimerValue(current);
-    current -= 1000;
-    if (current === -1000) {
+const reverseCounter = timeDiff => {
+  let current = timeDiff;
+  timerId = setInterval(() => {
+    if (current === 0) {
       clearInterval(timerId);
     }
+    current -= 1000;
+    writeTimerValue(current);
   }, 1000);
 };
 
-// -------------------------------------------
+// --- Отработка по нажатию Стоп
+const onStopClick = () => {
+  // Останавливаем таймер
+  clearInterval(timerId);
+  // Очищаем поля счетчика
+  refs.daysCounter.textContent = '00';
+  refs.hoursCounter.textContent = '00';
+  refs.minutesCounter.textContent = '00';
+  refs.secondsCounter.textContent = '00';
+  // Активируем flatpicker
+  creatFlatPickr('create');
+  // Делаем кнопку невидимой
+  stopBtn.style.visibility = 'hidden';
+};
 
-const onInputField = () => {};
-
-// const onBlurField = () => {};
-
+// --- Обработка нажатия кнопки Старт -------
 const onStartClick = () => {
-  reverseCounter(global);
+  // Деактивируем кнопку Старт
+  refs.startBtn.setAttribute('disabled', true);
+  // Запускаем отсчет таймера
+  reverseCounter(timeDiff);
+  // Удаляем экземпляр, что бы избежать
+  // повторного запуска.
+  creatFlatPickr('destroy');
+  // Создаем кнопку Стоп
+  stopBtn.style.visibility = 'visible';
 };
 // ------------------------------------------
+// --- Конец блока обработки ------------
+// ------------------------------------------
 
+// ------------------------------------------
 // --- Слушатели ----------------------------
 // ------------------------------------------
-fieldInput.addEventListener('focus', onInputField);
-// fieldInput.addEventListener('blur', onBlurField);
-
-startBtn.addEventListener('click', onStartClick);
+refs.startBtn.addEventListener('click', onStartClick);
+stopBtn.addEventListener('click', onStopClick);
 // ------------------------------------------
-
-// // const data = new Date().getTime();
-// // console.log(data);
-
-// // setTimeout(() => {
-// //    console.log(data);
-// //    const date = new Date();
-// //    console.log(date);
-// // }, 3000);
-// const docQuer = document.querySelector('#datetime-picker');
-// const startBtn = document.querySelector('[ data-start]');
-
-// console.log(docQuer.value);
-// // const res = docQuer.textContent
-// // const docQuer = document.createElements();
-// const isActive = false;
-// const timer = {
-//   start() {
-//     const startTime = Date.now();
-//     // console.log(startTime);
-//     setInterval(() => {
-//       const currentTime = Date.now();
-//       const dataTime = currentTime - startTime;
-//       const time = convertMs(dataTime);
-//       // console.log(`${days}:${hours}:${minutes}:${seconds}`);
-//       // const resOfTime = (`${days}:${hours}:${minutes}:${seconds}`)
-//       updateInputFace(time);
-//     }, 1000);
-//   },
-// };
-
-// startBtn.addEventListener('click', () => {
-//   //  if (isActive) {
-//   //       return
-//   // }
-//   startBtn.setAttribute('disabled', false);
-//   timer.start();
-// });
-
-// function updateInputFace({ days, hours, minutes, seconds }) {
-//   docQuer.value = `${days}:${hours}:${minutes}:${seconds}`;
-// }
-
-// // ==================== функція додає знаки до значення =============================
-// function addLeadingZero(value) {
-//   return String(value).padStart(2, '0');
-// }
-// // ==================================================================================
-
-// // =================== функція для виоду часу =======================================
-// function convertMs(ms) {
-//   // Number of milliseconds per unit of time
-//   const second = 1000;
-//   const minute = second * 60;
-//   const hour = minute * 60;
-//   const day = hour * 24;
-
-//   // Remaining days
-//   const days = addLeadingZero(Math.floor(ms / day));
-//   // Remaining hours
-//   const hours = addLeadingZero(Math.floor((ms % day) / hour));
-//   // Remaining minutes
-//   const minutes = addLeadingZero(Math.floor(((ms % day) % hour) / minute));
-//   // Remaining seconds
-//   const seconds = addLeadingZero(Math.floor((((ms % day) % hour) % minute) / second));
-
-//   return { days, hours, minutes, seconds };
-// }
-// // =================================================================================
