@@ -8,26 +8,60 @@ import Notiflix from 'notiflix';
 import 'notiflix/dist/notiflix-3.2.2.min.css';
 // ------------------------------------------
 
+// ------------------------------------------
 // --- Блок инициализации -------------------
 // ------------------------------------------
-const daysCounter = document.querySelector('[data-days]');
-const hoursCounter = document.querySelector('[data-hours]');
-const minutesCounter = document.querySelector('[data-minutes]');
-const secondsCounter = document.querySelector('[data-seconds]');
+// Объект расположений ----------------------
+const refs = {
+  daysCounter: document.querySelector('[data-days]'),
+  hoursCounter: document.querySelector('[data-hours]'),
+  minutesCounter: document.querySelector('[data-minutes]'),
+  secondsCounter: document.querySelector('[data-seconds]'),
 
-const fieldInput = document.querySelector('#datetime-picker');
+  fieldInput: document.querySelector('#datetime-picker'),
 
-const startBtn = document.querySelector('[data-start]');
+  startBtn: document.querySelector('[data-start]'),
+};
 
-const second = 1000;
-const minute = second * 60;
-const hour = minute * 60;
-const day = hour * 24;
+// Объект временных интервалов --------------
+const timeRange = {
+  second: 1000,
+  minute: 60000,
+  hour: 36000000,
+  day: 86400000,
+};
 
-// Кнопка Старт неактивна
+// Глобальная переменная временной разницы --
+let timeDiff = null;
+
+// Инициализация опций flatpickr и вызов ---
+// обработчика времени ---------------------
+const options = {
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+
+  onClose(selectedDates) {
+    console.log(selectedDates);
+    dateHandler();
+  },
+};
+
+// Кнопка Старт деактивирована --------------
 startBtn.setAttribute('disabled', true);
+
+// Навесили на поле ввода вызов flatpickr ---
+flatpickr('#datetime-picker', options);
+
 // ------------------------------------------
-let global = null;
+// --- Конец блока инициализации ------------
+// ------------------------------------------
+
+// ------------------------------------------
+// --- Блок обработки -----------------------
+// ------------------------------------------
+
 // Обработчик даты --------------------------
 const dateHandler = () => {
   const dateMS = Date.parse(fieldInput.value);
@@ -40,24 +74,6 @@ const dateHandler = () => {
   writeTimerValue(dateMS - currentDate.getTime());
   global = dateMS - currentDate.getTime();
 };
-
-const options = {
-  enableTime: true,
-  time_24hr: true,
-  defaultDate: new Date(),
-  minuteIncrement: 1,
-
-  onClose(selectedDates) {
-    console.log(selectedDates);
-    dateHandler();
-    // return selectedDates;
-  },
-};
-
-flatpickr('#datetime-picker', options);
-
-// --- Блок обработки -----------------------
-// ------------------------------------------
 
 // --- Дописываем нуль к числу менше 10 -----
 const addZeroToNumber = number => String(number).padStart(2, '0');
