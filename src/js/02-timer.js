@@ -25,8 +25,21 @@ const hour = minute * 60;
 const day = hour * 24;
 
 // Кнопка Старт неактивна
-// startBtn.setAttribute('disabled', true);
+startBtn.setAttribute('disabled', true);
 // ------------------------------------------
+let global = null;
+// Обработчик даты --------------------------
+const dateHandler = () => {
+  const dateMS = Date.parse(fieldInput.value);
+  const currentDate = new Date();
+  if (dateMS - currentDate.getTime() < 0) {
+    alert('asfsfs');
+    return;
+  }
+  startBtn.removeAttribute('disabled');
+  writeTimerValue(dateMS - currentDate.getTime());
+  global = dateMS - currentDate.getTime();
+};
 
 const options = {
   enableTime: true,
@@ -35,8 +48,8 @@ const options = {
   minuteIncrement: 1,
 
   onClose(selectedDates) {
-    console.log(selectedDates[0]);
-
+    console.log(selectedDates);
+    dateHandler();
     // return selectedDates;
   },
 };
@@ -69,6 +82,7 @@ const writeTimerValue = timeMSec => {
 
 // --- Счетчик -------------------------------
 const reverseCounter = timeMSec => {
+  startBtn.setAttribute('disabled', true);
   let current = timeMSec;
   let timerId = setInterval(() => {
     console.log(current);
@@ -87,7 +101,7 @@ const onInputField = () => {};
 // const onBlurField = () => {};
 
 const onStartClick = () => {
-  reverseCounter(55000);
+  reverseCounter(global);
 };
 // ------------------------------------------
 
