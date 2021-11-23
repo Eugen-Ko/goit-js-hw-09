@@ -5,6 +5,6 @@ var t,e=arguments[3];!function(e,i){"function"==typeof t&&t.amd?t([],function(){
 },{}],"opPG":[function(require,module,exports) {
 
 },{}],"GyVV":[function(require,module,exports) {
-"use strict";var i=t(require("notiflix"));function t(i){return i&&i.__esModule?i:{default:i}}function n(i,t){Math.random()}require("notiflix/dist/notiflix-3.2.2.min.css");
+"use strict";var e=t(require("notiflix"));function t(e){return e&&e.__esModule?e:{default:e}}require("notiflix/dist/notiflix-3.2.2.min.css");const i=document.querySelector(".form");let n=0;const r=()=>{const e=new FormData(i),t={};return e.forEach((e,i)=>{t[i]=Number(e)}),t},a=({index:e,timeDelay:t})=>{const i=Math.random()>.3;return new Promise((n,r)=>{setInterval(()=>{i&&n({index:e,timeDelay:t}),r({index:e,timeDelay:t})},t)})},l=({delay:t,step:i,amount:r})=>{let l=t;for(let o=1;o<=r;o++)a({index:o,timeDelay:l+=i}).then(({index:t,timeDelay:i})=>{e.default.Notify.success(` При клике № ${n} ${t}-й промис выполнен за ${i} мсек !!`)}).catch(({index:t,timeDelay:i})=>{e.default.Notify.failure(` При клике № ${n} ${t}-й промис откленен за ${i} мсек !!`)})},o=e=>{e.preventDefault(),n+=1,l(r())};i.addEventListener("submit",o);
 },{"notiflix":"hWOm","notiflix/dist/notiflix-3.2.2.min.css":"opPG"}]},{},["GyVV"], null)
-//# sourceMappingURL=/parcel-project-template/03-promises.3181d0ad.js.map
+//# sourceMappingURL=/parcel-project-template/03-promises.c7933f39.js.map
