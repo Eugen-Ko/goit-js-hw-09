@@ -75,7 +75,7 @@ creatFlatPickr('create');
 const createStopBtn = () => {
   refs.timer.insertAdjacentHTML(
     'beforebegin',
-    `<button type="button" data-stop>Stop and Clear</button>`,
+    `<button class="button02" type="button" data-stop>Stop and Clear</button>`,
   );
 };
 
